@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/opt/solar-controller/venv/bin/python
 
 import can
 import struct

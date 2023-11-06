@@ -4,6 +4,12 @@ Solar Controller Tools designed to control a custom-made Solar Setup.
 Primarily intended to be installed on a SBC (e.g. Raspberry PI 2/3/4), but in theory should also work in a Virtual Machine (e.g. KVM) or any Generic X86/AMD64 Computer.
 
 # Setup
+## Clone Repository
+```
+cd /opt
+git clone https://github.com/luckylinux/solar-controller.git 
+```
+
 ## Create Virtual Environment
 ```
 python -m venv /opt/solar-controller/venv/
@@ -19,7 +25,7 @@ Refer to https://docs.python.org/3/library/venv.html ("How venvs work").
 
 ## Install Requirements
 ```
-pip install -r ./requirements.txt
+/opt/solar-controller/venv/bin/pip install -r ./requirements.txt
 ```
 
 # Charger
