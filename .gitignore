@@ -1,3 +1,13 @@
+############################################
+### Custom Project Settings              ###
+############################################
+config/
+secrets/
+
+############################################
+### DEFAULT <Python> .gitignore template ###
+############################################
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
