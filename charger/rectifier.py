@@ -123,7 +123,7 @@ if __name__ == "__main__":
     #limit_input('can0', 10.0)
     #restart_overvoltage('can0', False)
 
-    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser = argparse.ArgumentParser(description='Set/Get Parameters from Emerson/Vertiv Rectifiers.')
 
     parser.add_argument('-m', '--mode' , default="set" ,
                     help='Mode of Operation (set/get)')
