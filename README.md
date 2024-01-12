@@ -28,6 +28,21 @@ Refer to https://docs.python.org/3/library/venv.html ("How venvs work").
 /opt/solar-controller/venv/bin/pip install -r ./requirements.txt
 ```
 
+## Put tmp on RAMdisk (Reccomended)
+In order to reduce disk write cycles & prevent Data Corruption, it is suggested to put the tmp folder on tmpfs / ramdisk.
+
+Add to /etc/fstab
+```
+tmpfs		/opt/solar-controller/tmp         tmpfs   auto,rw,nodev,nosuid,size=512M          0		0
+```
+
+Suggest you also do
+```
+chattr +i /opt/solar-controller/tmp
+```
+
+In order to prevent writing to that folder UNLESS the tmpfs is correctly mounted.
+
 # Charger
 ## Introduction
 The Charger control is based on the Emerson R48-300e0e3 script from https://github.com/PurpleAlien/R48_Rectifier.
