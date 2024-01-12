@@ -37,3 +37,27 @@ CAN control of an Emerson/Vertiv R48 Rectifier, such as an R48-3000e3. These kin
 
 A used and pre-configured R48-3000e3 (3kW) with adapter interface can be found e.g. on Aliexpress for under €100 shipping included: https://s.click.aliexpress.com/e/_DeSzqo9
 
+# Inverter Interface
+## Deye
+https://github.com/klatremis/esphome-for-deye
+
+# Battery Interface
+## JK BMS
+https://github.com/syssi/esphome-jk-bms
+
+# Utility & Distribution
+# Denmark
+### Data
+This can Fetch your Electricity Consumption & Costs.
+
+- eloverblik-utilities
+     - Code: https://github.com/helmstedt/eloverblik-utilities
+     - Description: https://helmstedt.dk/2023/05/hent-data-om-dit-elforbrug-fra-eloverblik-dk/
+- pyeloverblik
+     - Code: https://github.com/JonasPed/pyeloverblik
+
+### Prices
+- Elspot & Elbas Electricity Prices: https://github.com/kipe/nordpool
+
+# Solar
+#
