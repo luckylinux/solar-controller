@@ -19,6 +19,11 @@ done
 # Loop
 while true
 do
-    ./emerson-r48.py
-    sleep 30
+    for adapter in "${adapters[@]}"
+    do
+        #./emerson-r48.py
+        #./rectifier.py "$adapter" 56.0
+        ./rectifier.py --interface "$adapter" --voltage 56.0 --current 50 --permanent False
+        sleep 10
+    done
 done
