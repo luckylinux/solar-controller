@@ -79,8 +79,8 @@ def set_current_value(channel, current, fixed=False):
     current_min = OUTPUT_CURRENT_RATED_PERCENTAGE_MIN*(OUTPUT_CURRENT_RATED_VALUE/OUTPUT_CURRENT_RATED_PERCENTAGE)
     current_max = OUTPUT_CURRENT_RATED_PERCENTAGE_MAX*(OUTPUT_CURRENT_RATED_VALUE/OUTPUT_CURRENT_RATED_PERCENTAGE)
 
-    print(current)
-    print(percentage)
+#    print(current)
+#    print(percentage)
 
     if OUTPUT_CURRENT_RATED_PERCENTAGE_MIN <= percentage <= OUTPUT_CURRENT_RATED_PERCENTAGE_MAX:
         set_current_percentage(channel , percentage, fixed)
@@ -141,6 +141,8 @@ if __name__ == "__main__":
                     help='Adapter Interface (can0, can1, ...)')
 
     args = parser.parse_args()
+
+#    print(args.permanent)
 
     if args.mode == "set":
        # Set Parameters
