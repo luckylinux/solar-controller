@@ -62,6 +62,21 @@ SHELL=/bin/bash
 
 Note: in the future this might be replaced / complemented by a Systemd Service !
 
+## Setup Systemd Service
+Create the file `/lib/systemd/system/shellscript.service` and include the contents as follows
+
+```
+[Unit]
+Description=Solar Controller Main Script
+
+[Service]
+ExecStart=/bin/bash -c 'cd /opt/solar-controller && ./start.sh'
+ExecStop=/bin/bash -c 'cd /opt/solar-controller && ./stop.sh'
+
+[Install]
+WantedBy=multi-user.target
+```
+
 # Charger
 ## Introduction
 The Charger control is based on the Emerson R48-300e0e3 script from https://github.com/PurpleAlien/R48_Rectifier.
