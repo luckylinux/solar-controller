@@ -171,3 +171,6 @@ cython_debug/
 
 # VSCode / VSCodium
 .vscode/
+
+# Deleted files from sshfs fuse mount
+.Trash-1000/

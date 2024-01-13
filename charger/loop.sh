@@ -44,7 +44,8 @@ do
         #./rectifier.py "$adapter" 56.0
         #./rectifier.py --interface "$adapter" --voltage 56.0 --current 20.0 --permanent False
         #sudo /opt/solar-controller/venv/bin/python ./rectifier.py --mode "set" --interface "$adapter" --voltage 56.0 --current_value 50.0
-        sudo python ./rectifier.py --mode "set" --interface "$adapter" --voltage 56.0 --current_value 50.0
+#        sudo python ./rectifier.py --mode "set" --interface "$adapter" --voltage 54.6 --current_value 50.0
+        sudo python ./rectifier.py --mode "set" --interface "$adapter" --voltage 51.6 --current_value 50.0
         sleep 10
     done
 done

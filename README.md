@@ -4,6 +4,16 @@ Solar Controller Tools designed to control a custom-made Solar Setup.
 Primarily intended to be installed on a SBC (e.g. Raspberry PI 2/3/4), but in theory should also work in a Virtual Machine (e.g. KVM) or any Generic X86/AMD64 Computer.
 
 # Setup
+## Install Dependencies
+```
+apt-get install git libopenblas-dev
+```
+
+Details:
+- `git` is required in order to checkout the repository, fork and contribute to the project
+- `libopenblas-dev` is required for `numpy` (installed in the `venv` via `pip`) to work properly
+
+
 ## Clone Repository
 ```
 cd /opt
