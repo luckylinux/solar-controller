@@ -32,7 +32,8 @@ if __name__ == "__main__":
 
     # Reference values are stored in strategy file
     reference_file = f"{basepath}/{current_date}.xlsx";
-    print(reference_file)
+
+    print(f"Using Reference File {reference_file}")
 
     # Open file
     if os.path.exists(reference_file):
@@ -63,20 +64,24 @@ if __name__ == "__main__":
                        and datetime_end > '{current_datetime}'")
 
         # Debug
-        #print(current_setting) 
+        print(current_setting) 
         
         # Set Voltage
-        set_voltage = current_setting.get("set_voltage")   
+        set_voltage = str(current_setting.get("set_voltage").values[0])
 
         voltage_file_handle = open(f"{rootpath}/tmp/set_voltage" , 'w')
         voltage_file_handle.write(set_voltage)
         voltage_file_handle.close()
 
+        print(f"Voltage Set to {set_voltage} VDC")
+
         # Set Current
-        set_current = current_setting.get("set_current")
+        set_current = str(current_setting.get("set_current").values[0])
         current_file_handle = open(f"{rootpath}/tmp/set_current" , 'w')
         current_file_handle.write(set_current)
         current_file_handle.close()
+
+        print(f"Current Set to {set_current} ADC")
 
     else:
         print(f"Error: file {filename} does NOT exist !")
