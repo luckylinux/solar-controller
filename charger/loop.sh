@@ -40,12 +40,31 @@ while true
 do
     for adapter in "${adapters[@]}"
     do
+	# Get reference value
+        voltage_reference_file="/opt/solar-controller/tmp/set_voltage"
+        if [[ -f "${voltage_reference_file}" ]]; then
+            set_voltage=$(cat ${voltage_reference_file})
+        else
+            set_voltage="51.6"
+        fi
+
+        current_reference_file="/opt/solar-controller/tmp/set_current"
+        if [[ -f "${current_reference_file}" ]]; then
+            set_current=$(cat ${current_reference_file})
+        else
+            set_current="50"
+        fi
+
+	echo "Set Output Voltage to ${set_voltage} VDC"
+	echo "Set Output Current to ${set_current} ADC"
+
         #./emerson-r48.py
         #./rectifier.py "$adapter" 56.0
         #./rectifier.py --interface "$adapter" --voltage 56.0 --current 20.0 --permanent False
         #sudo /opt/solar-controller/venv/bin/python ./rectifier.py --mode "set" --interface "$adapter" --voltage 56.0 --current_value 50.0
 #        sudo python ./rectifier.py --mode "set" --interface "$adapter" --voltage 54.6 --current_value 50.0
-        sudo python ./rectifier.py --mode "set" --interface "$adapter" --voltage 51.6 --current_value 50.0
+#        sudo python ./rectifier.py --mode "set" --interface "$adapter" --voltage 51.6 --current_value 50.0
+        sudo python ./rectifier.py --mode "set" --interface "$adapter" --voltage ${set_voltage} --current_value ${set_current}
         sleep 10
     done
 done

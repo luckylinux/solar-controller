@@ -53,6 +53,15 @@ chattr +i /opt/solar-controller/tmp
 
 In order to prevent writing to that folder UNLESS the tmpfs is correctly mounted.
 
+## Setup CRON for Scheduled Operations
+Put in `/etc/cron.d/solar-controller` so that the tool can periodically execute itself every minute
+```
+SHELL=/bin/bash
+*/1 * * * * <username> source /opt/solar-controller/venv/bin/activate && python /opt/solar-controller/strategy/strategy.py
+```
+
+Note: in the future this might be replaced / complemented by a Systemd Service !
+
 # Charger
 ## Introduction
 The Charger control is based on the Emerson R48-300e0e3 script from https://github.com/PurpleAlien/R48_Rectifier.
