@@ -22,7 +22,7 @@ if __name__ == "__main__":
     #print("date:",current_date)	
     #print("date:",current_time)	
 
-    # Determine Base Path of the Project
+    # Determine Base Path of the current file
     basepath = pathlib.Path(__file__).parent.resolve()
     #print(basepath)
 

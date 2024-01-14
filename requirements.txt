@@ -1,3 +1,5 @@
 python-can
 pandas
 openpyxl
+paho-mqtt
+tabulate
