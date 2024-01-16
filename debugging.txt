@@ -1,0 +1,1 @@
+panel serve battery/jk-bms.py --show --autoreload --allow-websocket-origin='*'

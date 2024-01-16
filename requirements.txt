@@ -3,3 +3,4 @@ pandas
 openpyxl
 paho-mqtt
 tabulate
+panel

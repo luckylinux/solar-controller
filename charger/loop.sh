@@ -5,8 +5,10 @@ source /opt/solar-controller/venv/bin/activate
 
 # Define adapters
 adapters=()
-adapters+=("can0")
-adapters+=("can1")
+#adapters+=("can0")
+#adapters+=("can1")
+adapters+=("grid-charger-0")
+adapters+=("grid-charger-1")
 
 # Set up traps
 #trap cleanup_routine SIGINT SIGTERM EXIT
