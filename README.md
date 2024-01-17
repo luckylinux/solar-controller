@@ -86,6 +86,21 @@ CAN control of an Emerson/Vertiv R48 Rectifier, such as an R48-3000e3. These kin
 
 A used and pre-configured R48-3000e3 (3kW) with adapter interface can be found e.g. on Aliexpress for under €100 shipping included: https://s.click.aliexpress.com/e/_DeSzqo9
 
+## USB Hubs & Experienced Issues
+Please be aware when using a Powered USB Hub.
+
+I have experienced very weird issues with the CAN Adapters with USB Powered Hubs (USB Hubs Powered by an AC Adapter).
+
+The CAN Adapter would not throw any error message when executing the Rectifier Python script, but no Packet would be sent/received (could be printed when using `ifconfig` or `ip addr`). And of course, the Rectifier would NOT change the Output Voltage / Current to the requested setting.
+
+This might be combined by the fact that - at the time - the script would NOT properly close the CAN connection.
+
+No amount of reboots would solve the issue.
+
+The only solution was to REMOVE the Power Cable from the USB Adapter. After doing that, and issueing a `reboot`, the system started working as expected.
+
+There might be other solutions (like `usbreset` and similar that trigger a Power Cycle reset on the Requested USB Adapter) that could be worth investigating in the future though.
+
 ## Rename CAN Adapters
 In case it is desired to use several Chargers, it can be beneficial to properly identify which CAN adapter controls which charger.
 
