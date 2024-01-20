@@ -114,7 +114,7 @@ You need to Perform this Procedure One Adapter at the time. It is suggested to P
 
 1. Find the Serial Number of your CAN Adapter
 ```
-lsusb --v | grep -i iSerial
+lsusb -v | grep -i iSerial
   iSerial                 3 002A002D4730511420303650
 ```
 
@@ -249,6 +249,21 @@ and the attributes from one single parent device.
 ```
 SUBSYSTEM=="net", ATTRS{idVendor}=="1d50", ATTRS{serial}=="002A002D4730511420303650", NAME="grid-charger-1"
 ```
+
+You can rename multiple charges within the same file, simply add one new line for each charger :).
+
+
+3. Apply without Reboot
+   On some systems it might be sufficient to run
+   ```
+   udevadm control --reload-rules && udevadm trigger
+   ```
+
+   However on Systemd-based Systems (Ubuntu, Debian, Fedora, ...) this will not be sufficient.
+   Instead the associated Systemd Service needs to be restarted
+   ```
+   systemctl restart systemd-udev-trigger.service
+   ```
 
 3. Reboot
 
