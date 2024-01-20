@@ -174,3 +174,6 @@ cython_debug/
 
 # Deleted files from sshfs fuse mount
 .Trash-1000/
+
+# Temporary files
+tmp/
