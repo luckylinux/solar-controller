@@ -252,6 +252,11 @@ SUBSYSTEM=="net", ATTRS{idVendor}=="1d50", ATTRS{serial}=="002A002D4730511420303
 
 You can rename multiple charges within the same file, simply add one new line for each charger :).
 
+The Attributes that need to be changed are:
+- idVendor: found using `lsusb -v | grep -i idVendor` which returns something like `idVendor           0x1d50 OpenMoko, Inc.`
+- serial: found using `lsusb -v | grep -i iSerial` which returns something like `  iSerial                 3 002A002D4730511420303650` (note the space between the latest 2 numbers - only the last number is the serial number !)
+- NAME: your name of choice (e.g. `grid-charger-0`, `diesel-charger-0`, ...)
+
 
 3. Apply without Reboot
    On some systems it might be sufficient to run
@@ -266,11 +271,6 @@ You can rename multiple charges within the same file, simply add one new line fo
    ```
 
 3. Reboot
-
-The Attributes that need to be changed are:
-- idVendor: found using `lsusb -v | grep -i idVendor` which returns something like `idVendor           0x1d50 OpenMoko, Inc.`
-- serial: found using `lsusb -v | grep -i iSerial` which returns something like `  iSerial                 3 002A002D4730511420303650` (note the space between the latest 2 numbers - only the last number is the serial number !)
-- NAME: your name of choice (e.g. `grid-charger-0`, `diesel-charger-0`, ...)
 
 # Inverter Interface
 ## Deye
