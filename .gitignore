@@ -177,3 +177,7 @@ cython_debug/
 
 # Temporary files
 tmp/
+
+# Debugging Data
+debug/
+debugging/
