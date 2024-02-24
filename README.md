@@ -272,6 +272,18 @@ The Attributes that need to be changed are:
 
 3. Reboot
 
+# Use CANbus within Docker Image
+TODO
+
+Useful Material quickly found on the internet:
+- https://stackoverflow.com/questions/69078501/how-to-make-can-bus-operate-from-within-a-docker-container
+- https://stackoverflow.com/questions/63019226/sharing-virtual-network-with-docker-container
+- https://github.com/Connectitude/forward-canbus
+- https://forums.docker.com/t/how-to-bridge-an-interface-with-docker-compose-generated-network/85264
+
+Alternative is to pass-through USB device to Docker Container and let it manage the interfaces:
+- https://stackoverflow.com/questions/24225647/docker-a-way-to-give-access-to-a-host-usb-or-serial-device
+
 # Inverter Interface
 ## Deye
 https://github.com/klatremis/esphome-for-deye
