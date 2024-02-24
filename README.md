@@ -283,6 +283,11 @@ Useful Material quickly found on the internet:
 
 Alternative is to pass-through USB device to Docker Container and let it manage the interfaces:
 - https://stackoverflow.com/questions/24225647/docker-a-way-to-give-access-to-a-host-usb-or-serial-device
+- https://github.com/docker/cli/issues/3456 : pass through USB device ? But number might change every boot or connection/disconnection
+
+Also UDEV to create a symlink in /dev/my-usb-device so that USB devices can be fed to Docker/Podman (and survive a reboot, i.e. not depend on busID / portID)
+- https://www.linuxquestions.org/questions/linux-hardware-18/force-usb-to-use-same-dev-id-using-udev-rule-4175434928/
+
 
 # Inverter Interface
 ## Deye
