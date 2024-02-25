@@ -101,7 +101,7 @@ The only solution was to REMOVE the Power Cable from the USB Adapter. After doin
 
 There might be other solutions (like `usbreset` and similar that trigger a Power Cycle reset on the Requested USB Adapter) that could be worth investigating in the future though.
 
-## Rename CAN Adapters
+## Rename CAN Interface Name and USB-CAN Device Name
 In case it is desired to use several Chargers, it can be beneficial to properly identify which CAN adapter controls which charger.
 
 Unfortunately, at present, the Emerson R48-3000e has always the same Arbitration ID.
@@ -248,6 +248,7 @@ and the attributes from one single parent device.
 2. Create `/etc/udev/rules.d/99-can-adapters.rules:`
 ```
 SUBSYSTEM=="net", ATTRS{idVendor}=="1d50", ATTRS{serial}=="002A002D4730511420303650", NAME="grid-charger-1"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1d50", ATTRS{serial}=="002A002D4730511420303650", ACTION=="add" , SYMLINK+="grid-charger-1"
 ```
 
 You can rename multiple charges within the same file, simply add one new line for each charger :).
@@ -257,6 +258,21 @@ The Attributes that need to be changed are:
 - serial: found using `lsusb -v | grep -i iSerial` which returns something like `  iSerial                 3 002A002D4730511420303650` (note the space between the latest 2 numbers - only the last number is the serial number !)
 - NAME: your name of choice (e.g. `grid-charger-0`, `diesel-charger-0`, ...)
 
+
+Note that:
+- The CAN Setting has an impact on the **interface name** that can be seen/addressed using `ip addr` or `ifconfig` or also found in `/sys/class/net/*`
+- The USB Setting has an impact on the **device name** that can be accessed using `/dev/grid-charger-1` (as in the example) instead of `/dev/bus/usb/xxx/yyy` (which may change when USB devices get plugged in/out, after a reboot, etc)
+
+My overall configuration as an example:
+```
+# First Charger 
+SUBSYSTEM=="net", ATTRS{idVendor}=="1d50", ATTRS{serial}=="003D00474E56510220373334", NAME="grid-charger-0"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1d50", ATTRS{serial}=="003D00474E56510220373334" , ACTION=="add" , SYMLINK+="grid-charger-0"
+
+# Second Charger
+SUBSYSTEM=="net", ATTRS{idVendor}=="1d50", ATTRS{serial}=="002A002D4730511420303650", NAME="grid-charger-1"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1d50", ATTRS{serial}=="002A002D4730511420303650" , ACTION=="add" , SYMLINK+="grid-charger-1"
+```
 
 3. Apply without Reboot
    On some systems it might be sufficient to run

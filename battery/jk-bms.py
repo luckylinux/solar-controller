@@ -25,8 +25,8 @@ pn.extension('tabulator')
 
 broker = '192.168.4.10'
 port = 1883
-battery_id = "01"
-#battery_id = "02"
+#battery_id = "01"
+battery_id = "02"
 battery_txt = "jk-bms-bat"
 prefix = f"{battery_txt}{battery_id}"
 topic = f"{prefix}/#"
