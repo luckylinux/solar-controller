@@ -283,7 +283,11 @@ SUBSYSTEM=="usb", ATTRS{idVendor}=="1d50", ATTRS{serial}=="002A002D4730511420303
    However on Systemd-based Systems (Ubuntu, Debian, Fedora, ...) this will not be sufficient.
    Instead the associated Systemd Service needs to be restarted
    ```
+   # This alone does NOT seem to be sufficient
    systemctl restart systemd-udev-trigger.service
+   
+   # This seems to create the required /dev/grid-charger-0 and /dev/grid-charger-1 devices
+   systemctl restart systemd-udevd.service
    ```
 
 3. Reboot
