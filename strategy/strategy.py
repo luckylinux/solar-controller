@@ -5,7 +5,120 @@ import pandas as pd
 import os
 import pathlib
 
+# Import paho-mqtt to interact with BMS / Inverter
+from paho.mqtt import client as mqtt_client
+
+# Generate a Client ID with the subscribe prefix.
+client_id = f'solarstrategy-subscribe-{random.randint(0, 100)}'
+
+# MQTT Settings
+mqtt_broker = '192.168.4.10'
+mqtt_port = 1883
+mqtt_username = ''
+mqtt_passowrd = ''
+
+# Define Requested Charge Voltage Topic
+requestedchargevoltagetopic = 'jk-bms-bat02/sensor/jk-bms-bat02_requested_charge_voltage'
+
+# Define Requested Charge Voltage Variable
+#requestedchargevoltage = 51.0 # VDC (Default Value)
+requestedchargevoltageoffsetvalue = -0.2 # VDC (Fixed)
+
+# Connect to MQTT broker
+def connect_mqtt() -> mqtt_client:
+    def on_connect(client, userdata, flags, rc):
+        if rc == 0:
+            print("Connected to MQTT Broker!")
+        else:
+            print("Failed to connect, return code %d\n", rc)
+
+    client = mqtt_client.Client(client_id)
+    # client.username_pw_set(mqtt_username, mqtt_password)
+    client.on_connect = on_connect
+    client.connect(mqtt_broker, mqtt_port)
+    return client
+
+
+def subscribe(client: mqtt_client , data):
+    def on_message(client, userdata, msg):
+        # Do nothing
+        #pass
+        #print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
+        #print(data)
+        orig_topic = msg.topic
+
+        requestedchargevoltage = msg.payload.decode("UTF-8")
+        data['Requested_Charge_Voltage'] = requestedchargevoltage
+        print(f'Requested Charge Voltage: {requestedchargevoltage}')
+
+        #key = orig_topic.replace(prefix + '_' , "")
+        #key = key.replace(prefix , "")
+        #key = key.replace('/state' , "")
+        #key = key.replace('/debug' , "") # Ignore debug messages
+        #key = key.lstrip('/')
+        ####print(key)
+        #s = re.split(r'/', key)
+        ####print(s)
+
+        #if len(s) == 2:
+        #    t = s[0]
+        #    k = s[1]
+        ######print(t)
+        ######print(k)
+        #    if k in data:
+        #        pass
+        #    else:
+        #        data[k] = init_signal()
+        #        data[k]['ID'] = k
+        #
+        #    data[k]['Type'] = t
+        #    data[k]['Value'] = msg.payload.decode()
+        #    data[k]['Battery_Description'] = prefix
+        #    data[k]['Battery_Number'] = int(prefix.replace(battery_txt , ''))
+        #
+        #    if "voltage" in k:
+        #         data[k]['Unit'] = "VDC"
+        #    elif "current" in k:
+        #        data[k]['Unit'] = "ADC"
+        #    elif "power" in k:
+        #        data[k]['Unit'] = "W"
+        #    elif "temperature" in k:
+        #        data[k]['Unit'] = "°C"
+        #    elif "state_of_charge" in k:
+        #        data[k]['Unit'] = "%"
+        #    elif "capacity" in k:
+        #        data[k]['Unit'] = "Ah"
+        #    elif "total_runtime" in k and "formatted" not in k:
+        #        data[k]['Unit'] = "s"
+        #    elif "resistance" in k:
+        #        data[k]['Unit'] = "mOhm"
+        #    else:
+        #        data[k]['Unit'] = "none"
+        #        #data[k]['Value'] = msg.payload.decode("UTF-8")
+        #
+    client.subscribe(topic)
+    client.on_message = on_message
+
+
+def init_scheme():
+    # Initialize Data as an Empty Dictionary
+    data = { }
+
+    # Add Fields
+    data['Requested_Charge_Voltage'] = 51; # VDC (default Value)
+
+
 if __name__ == "__main__":
+    # Init Scheme
+    data = init_scheme()
+
+    # Initialize MQTT Connection
+    client = connect_mqtt()
+    subscribe(client , data)
+
+    # Wait 5 seconds
+    time.sleep(5)
+
     # Get current date and time
     now = datetime.now() # current date and time
 
@@ -68,6 +181,12 @@ if __name__ == "__main__":
         
         # Set Voltage
         set_voltage = str(current_setting.get("set_voltage").values[0])
+
+        # Reduce Voltage if requested by BMS
+        requestedchargevoltage = data['Requested_Charge_Voltage']
+        if set_voltage > (requestedchargevoltage + requestedchargevoltageoffsetvalue):
+            print(f'Output Voltage tuned down from {set_voltage} to {requestedchargevoltage + requestedchargevoltageoffsetvalue}')
+            set_voltage = requestedchargevoltage + requestedchargevoltageoffsetvalue
 
         voltage_file_handle = open(f"{rootpath}/tmp/set_voltage" , 'w')
         voltage_file_handle.write(set_voltage)
