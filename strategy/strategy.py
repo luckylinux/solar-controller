@@ -4,6 +4,7 @@ from datetime import datetime
 import pandas as pd
 import os
 import pathlib
+import random
 
 # Import paho-mqtt to interact with BMS / Inverter
 from paho.mqtt import client as mqtt_client
@@ -18,7 +19,7 @@ mqtt_username = ''
 mqtt_passowrd = ''
 
 # Define Requested Charge Voltage Topic
-requestedchargevoltagetopic = 'jk-bms-bat02/sensor/jk-bms-bat02_requested_charge_voltage'
+mqtt_topic = 'jk-bms-bat02/sensor/jk-bms-bat02_requested_charge_voltage/state'
 
 # Define Requested Charge Voltage Variable
 #requestedchargevoltage = 51.0 # VDC (Default Value)
@@ -46,8 +47,9 @@ def subscribe(client: mqtt_client , data):
         #print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
         #print(data)
         orig_topic = msg.topic
+        print(orig_topic)
 
-        requestedchargevoltage = msg.payload.decode("UTF-8")
+        requestedchargevoltage = float(msg.payload.decode("UTF-8"))
         data['Requested_Charge_Voltage'] = requestedchargevoltage
         print(f'Requested Charge Voltage: {requestedchargevoltage}')
 
@@ -96,7 +98,7 @@ def subscribe(client: mqtt_client , data):
         #        data[k]['Unit'] = "none"
         #        #data[k]['Value'] = msg.payload.decode("UTF-8")
         #
-    client.subscribe(topic)
+    client.subscribe(mqtt_topic)
     client.on_message = on_message
 
 
@@ -105,7 +107,10 @@ def init_scheme():
     data = { }
 
     # Add Fields
-    data['Requested_Charge_Voltage'] = 51; # VDC (default Value)
+    data['Requested_Charge_Voltage'] = float(51.0); # VDC (default Value)
+
+    # Return Structure
+    return data
 
 
 if __name__ == "__main__":
@@ -116,8 +121,14 @@ if __name__ == "__main__":
     client = connect_mqtt()
     subscribe(client , data)
 
+    # Start MQTT Loop and Fetch MQTT Data
+    client.loop_start()
+
     # Wait 5 seconds
     time.sleep(5)
+
+    # Stop MQTT Loop
+    client.loop_stop()
 
     # Get current date and time
     now = datetime.now() # current date and time
@@ -184,9 +195,12 @@ if __name__ == "__main__":
 
         # Reduce Voltage if requested by BMS
         requestedchargevoltage = data['Requested_Charge_Voltage']
-        if set_voltage > (requestedchargevoltage + requestedchargevoltageoffsetvalue):
+        if float(set_voltage) > (requestedchargevoltage + requestedchargevoltageoffsetvalue):
             print(f'Output Voltage tuned down from {set_voltage} to {requestedchargevoltage + requestedchargevoltageoffsetvalue}')
-            set_voltage = requestedchargevoltage + requestedchargevoltageoffsetvalue
+            set_voltage = str(requestedchargevoltage + requestedchargevoltageoffsetvalue)
+
+        # Temporary disable
+        #set_voltage = 51
 
         voltage_file_handle = open(f"{rootpath}/tmp/set_voltage" , 'w')
         voltage_file_handle.write(set_voltage)
