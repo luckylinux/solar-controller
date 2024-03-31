@@ -191,27 +191,40 @@ if __name__ == "__main__":
         print(current_setting) 
         
         # Set Voltage
-        set_voltage = str(current_setting.get("set_voltage").values[0])
+        set_voltage = current_setting.get("set_voltage").values[0]
 
         # Reduce Voltage if requested by BMS
         requestedchargevoltage = data['Requested_Charge_Voltage']
-        if float(set_voltage) > (requestedchargevoltage + requestedchargevoltageoffsetvalue):
+        if set_voltage > (requestedchargevoltage + requestedchargevoltageoffsetvalue):
             print(f'Output Voltage tuned down from {set_voltage} to {requestedchargevoltage + requestedchargevoltageoffsetvalue}')
-            set_voltage = str(requestedchargevoltage + requestedchargevoltageoffsetvalue)
+            set_voltage = requestedchargevoltage + requestedchargevoltageoffsetvalue
+        
+        # Only keep 1 decimal
+        set_voltage = round(set_voltage , 1)
+
+        # Convert to String
+        set_voltage_str = str(set_voltage)
 
         # Temporary disable
         #set_voltage = 51
 
         voltage_file_handle = open(f"{rootpath}/tmp/set_voltage" , 'w')
-        voltage_file_handle.write(set_voltage)
+        voltage_file_handle.write(set_voltage_str)
         voltage_file_handle.close()
 
         print(f"Voltage Set to {set_voltage} VDC")
 
         # Set Current
-        set_current = str(current_setting.get("set_current").values[0])
+        set_current = current_setting.get("set_current").values[0]
+
+        # Only keep 1 decimal
+        set_current = round(set_current , 1)
+
+        # Convert to String
+        set_current_str = str(set_current)
+
         current_file_handle = open(f"{rootpath}/tmp/set_current" , 'w')
-        current_file_handle.write(set_current)
+        current_file_handle.write(set_current_str)
         current_file_handle.close()
 
         print(f"Current Set to {set_current} ADC")
