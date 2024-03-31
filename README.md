@@ -247,8 +247,8 @@ and the attributes from one single parent device.
 
 2. Create `/etc/udev/rules.d/99-can-adapters.rules:`
 ```
-SUBSYSTEM=="net", ATTRS{idVendor}=="1d50", ATTRS{serial}=="002A002D4730511420303650", NAME="grid-charger-1"
-SUBSYSTEM=="usb", ATTRS{idVendor}=="1d50", ATTRS{serial}=="002A002D4730511420303650", ACTION=="add" , SYMLINK+="grid-charger-1"
+SUBSYSTEM=="net", ATTRS{idVendor}=="1d50", ATTRS{serial}=="002A002D4730511420303650", NAME="can-grid-01"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1d50", ATTRS{serial}=="002A002D4730511420303650", ACTION=="add" , SYMLINK+="usb-grid-01"
 ```
 
 You can rename multiple charges within the same file, simply add one new line for each charger :).
@@ -258,7 +258,6 @@ The Attributes that need to be changed are:
 - serial: found using `lsusb -v | grep -i iSerial` which returns something like `  iSerial                 3 002A002D4730511420303650` (note the space between the latest 2 numbers - only the last number is the serial number !)
 - NAME: your name of choice (e.g. `grid-charger-0`, `diesel-charger-0`, ...)
 
-
 Note that:
 - The CAN Setting has an impact on the **interface name** that can be seen/addressed using `ip addr` or `ifconfig` or also found in `/sys/class/net/*`
 - The USB Setting has an impact on the **device name** that can be accessed using `/dev/grid-charger-1` (as in the example) instead of `/dev/bus/usb/xxx/yyy` (which may change when USB devices get plugged in/out, after a reboot, etc)
@@ -266,13 +265,30 @@ Note that:
 My overall configuration as an example:
 ```
 # First Charger 
-SUBSYSTEM=="net", ATTRS{idVendor}=="1d50", ATTRS{serial}=="003D00474E56510220373334", NAME="grid-charger-0"
-SUBSYSTEM=="usb", ATTRS{idVendor}=="1d50", ATTRS{serial}=="003D00474E56510220373334" , ACTION=="add" , SYMLINK+="grid-charger-0"
+SUBSYSTEM=="net", ATTRS{idVendor}=="1d50", ATTRS{serial}=="003D00474E56510220373334", NAME="can-grid-00"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1d50", ATTRS{serial}=="003D00474E56510220373334" , ACTION=="add" , SYMLINK+="usb-grid-00"
 
 # Second Charger
-SUBSYSTEM=="net", ATTRS{idVendor}=="1d50", ATTRS{serial}=="002A002D4730511420303650", NAME="grid-charger-1"
-SUBSYSTEM=="usb", ATTRS{idVendor}=="1d50", ATTRS{serial}=="002A002D4730511420303650" , ACTION=="add" , SYMLINK+="grid-charger-1"
+SUBSYSTEM=="net", ATTRS{idVendor}=="1d50", ATTRS{serial}=="002A002D4730511420303650", NAME="can-grid-01"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1d50", ATTRS{serial}=="002A002D4730511420303650" , ACTION=="add" , SYMLINK+="usb-grid-01"
 ```
+
+**IMPORTANT**
+Note: the network device names MUST be **stritcly** (NOT equal to !) under `IFNAMSIZ` characters long. Currently this is set to 16 characters ! Therefore interface names only up to and including 15 characters are supported !
+See https://github.com/torvalds/linux/blob/master/include/uapi/linux/if.h
+If you exceed that, you will get an error such as Error: argument "grid-charger-0-container" is wrong: "name" not a valid ifname
+
+It is therefore suggested the following name conventions, so that the names are kept short. An additional 2 characters are required to run Podman/Docker with vxcan (need to add "-h" for host vxcan device / "-c" for container vxcan device).
+
+Grid
+- can-grid-xy and usb-grid-xy
+
+Diesel or Generator
+- can-dies-xy and usb-dies-xy (short for Diesel)
+- can-gen-xy and usb-gen-xy (better than dying :D)
+
+Inverter (double Power Conversion)
+- can-inv-xy and usb-inv-xy
 
 3. Apply without Reboot
    On some systems it might be sufficient to run
@@ -283,7 +299,11 @@ SUBSYSTEM=="usb", ATTRS{idVendor}=="1d50", ATTRS{serial}=="002A002D4730511420303
    However on Systemd-based Systems (Ubuntu, Debian, Fedora, ...) this will not be sufficient.
    Instead the associated Systemd Service needs to be restarted
    ```
+   # This alone does NOT seem to be sufficient
    systemctl restart systemd-udev-trigger.service
+   
+   # This seems to create the required /dev/grid-charger-0 and /dev/grid-charger-1 devices
+   systemctl restart systemd-udevd.service
    ```
 
 3. Reboot
