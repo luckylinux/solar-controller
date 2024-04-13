@@ -67,6 +67,8 @@ do
 #        sudo python ./rectifier.py --mode "set" --interface "$adapter" --voltage 54.6 --current_value 50.0
 #        sudo python ./rectifier.py --mode "set" --interface "$adapter" --voltage 51.6 --current_value 50.0
         sudo python ./rectifier.py --mode "set" --interface "$adapter" --voltage ${set_voltage} --current_value ${set_current}
-        sleep 10
     done
+
+    # Wait 5 seconds
+    sleep 5
 done

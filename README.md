@@ -309,7 +309,15 @@ Inverter (double Power Conversion)
 3. Reboot
 
 # Use CANbus within Docker Image
-TODO
+## Reference
+Refere to the Implementation described at: https://github.com/luckylinux/solar-charger-emerson
+
+A full working proof-of-concept (for now) is provided including:
+- `Dockerfile` to build a Container (based on Alpine and Debian Images)
+- `docker-compose.yml` to run the Images that are built locally
+- `Systemd` Service Files and Monitoring Scripts (which MUST be run as `root` in order to transfer the Ownership of the Network/CANbus Device to the required `userns` User Namespace under which the Docker/Podman Container is running)
+
+## LEGACY NOTES
 
 Useful Material quickly found on the internet:
 - https://stackoverflow.com/questions/69078501/how-to-make-can-bus-operate-from-within-a-docker-container

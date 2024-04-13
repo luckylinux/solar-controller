@@ -23,7 +23,8 @@ mqtt_topic = 'jk-bms-bat02/sensor/jk-bms-bat02_requested_charge_voltage/state'
 
 # Define Requested Charge Voltage Variable
 #requestedchargevoltage = 51.0 # VDC (Default Value)
-requestedchargevoltageoffsetvalue = -0.2 # VDC (Fixed)
+#requestedchargevoltageoffsetvalue = -0.2 # VDC (Fixed)
+requestedchargevoltageoffsetvalue = 0.0 # VDC (Fixed)
 
 # Connect to MQTT broker
 def connect_mqtt() -> mqtt_client:
