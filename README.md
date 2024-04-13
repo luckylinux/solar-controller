@@ -310,7 +310,9 @@ Inverter (double Power Conversion)
 
 # Use CANbus within Docker Image
 ## Reference
-Refere to the Implementation described at: https://github.com/luckylinux/solar-charger-emerson
+Refer to the Implementation described at: https://github.com/luckylinux/solar-charger-emerson
+
+In particular the Section Relevant for Rootless Podman/Docker: https://github.com/luckylinux/solar-charger-emerson?tab=readme-ov-file#can-using-podman--docker-namespaces
 
 A full working proof-of-concept (for now) is provided including:
 - `Dockerfile` to build a Container (based on Alpine and Debian Images)
