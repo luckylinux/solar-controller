@@ -4,6 +4,10 @@
 config/
 secrets/
 
+# XLS Config Files for Strategy
+strategy/*.xls
+strategy/*.xlsx
+
 ############################################
 ### DEFAULT <Python> .gitignore template ###
 ############################################

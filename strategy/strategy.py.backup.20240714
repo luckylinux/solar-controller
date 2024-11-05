@@ -108,7 +108,7 @@ def init_scheme():
     data = { }
 
     # Add Fields
-    data['Requested_Charge_Voltage'] = float(51.2); # VDC (default Value)
+    data['Requested_Charge_Voltage'] = float(51.0); # VDC (default Value)
 
     # Return Structure
     return data
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     # Start MQTT Loop and Fetch MQTT Data
     client.loop_start()
 
-    # Wait 5 Seconds (enough to get MQTT State Topic a few Times)
+    # Wait 5 seconds
     time.sleep(5)
 
     # Stop MQTT Loop
@@ -159,10 +159,6 @@ if __name__ == "__main__":
     reference_file = f"{basepath}/{current_date}.xlsx";
 
     print(f"Using Reference File {reference_file}")
-    
-    # Declare Variables
-    set_voltage = 51.5
-    set_current = 50.0
 
     # Open file
     if os.path.exists(reference_file):
@@ -204,43 +200,35 @@ if __name__ == "__main__":
             print(f'Output Voltage tuned down from {set_voltage} to {requestedchargevoltage + requestedchargevoltageoffsetvalue}')
             set_voltage = requestedchargevoltage + requestedchargevoltageoffsetvalue
         
-        # Only keep 1 Decimal for Voltage Reference
+        # Only keep 1 decimal
         set_voltage = round(set_voltage , 1)
+
+        # Convert to String
+        set_voltage_str = str(set_voltage)
+
+        # Temporary disable
+        #set_voltage = 51
+
+        voltage_file_handle = open(f"{rootpath}/tmp/set_voltage" , 'w')
+        voltage_file_handle.write(set_voltage_str)
+        voltage_file_handle.close()
+
+        print(f"Voltage Set to {set_voltage} VDC")
 
         # Set Current
         set_current = current_setting.get("set_current").values[0]
 
-        # Only keep 1 Decimal for Current Reference
+        # Only keep 1 decimal
         set_current = round(set_current , 1)
 
+        # Convert to String
+        set_current_str = str(set_current)
+
+        current_file_handle = open(f"{rootpath}/tmp/set_current" , 'w')
+        current_file_handle.write(set_current_str)
+        current_file_handle.close()
+
+        print(f"Current Set to {set_current} ADC")
+
     else:
-        print(f"Error: file {reference_file} does NOT exist !")
-        print(f"Using Default Values")
-        
-        # Use Default Value for Voltage
-        set_voltage = 51.2
-	
-        # Use Default Value for Current
-        set_current = 50.0
-    
-    
-        
-    # Convert Voltage to String
-    set_voltage_str = str(set_voltage)
-
-    # Write Voltage Reference to File
-    voltage_file_handle = open(f"{rootpath}/tmp/set_voltage" , 'w')
-    voltage_file_handle.write(set_voltage_str)
-    voltage_file_handle.close()
-    
-    print(f"Voltage Set to {set_voltage} VDC")
-    
-    # Convert Current to String
-    set_current_str = str(set_current)
-
-    # Write Current Reference to File
-    current_file_handle = open(f"{rootpath}/tmp/set_current" , 'w')
-    current_file_handle.write(set_current_str)
-    current_file_handle.close()
-
-    print(f"Current Set to {set_current} ADC")
+        print(f"Error: file {filename} does NOT exist !")
