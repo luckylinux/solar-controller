@@ -18,42 +18,13 @@ mqtt_port = 1883
 mqtt_username = ''
 mqtt_passowrd = ''
 
-# Data <---> MQTT Topics Mappings
-mqtt_topic = dict()
-
-# Define Controller Requested Charge Voltage Topic
-mqtt_topic["jk-bms-bat02_requested_charge_voltage"] = 'jk-bms-bat02/sensor/jk-bms-bat02_requested_charge_voltage/state'
-
-# Define BMS Measurements
-mqtt_topic["jk-bms-bat01_min_cell_voltage"] = 'jk-bms-bat01/sensor/jk-bms-bat01_min_cell_voltage/state'
-mqtt_topic["jk-bms-bat02_min_cell_voltage"] = 'jk-bms-bat02/sensor/jk-bms-bat02_min_cell_voltage/state'
-mqtt_topic["jk-bms-bat03_min_cell_voltage"] = 'jk-bms-bat03/sensor/jk-bms-bat03_min_cell_voltage/state'
-mqtt_topic["jk-bms-bat04_min_cell_voltage"] = 'jk-bms-bat04/sensor/jk-bms-bat04_min_cell_voltage/state'
-
-mqtt_topic["jk-bms-bat01_max_cell_voltage"] = 'jk-bms-bat01/sensor/jk-bms-bat01_max_cell_voltage/state'
-mqtt_topic["jk-bms-bat02_max_cell_voltage"] = 'jk-bms-bat02/sensor/jk-bms-bat02_max_cell_voltage/state'
-mqtt_topic["jk-bms-bat03_max_cell_voltage"] = 'jk-bms-bat03/sensor/jk-bms-bat03_max_cell_voltage/state'
-mqtt_topic["jk-bms-bat04_max_cell_voltage"] = 'jk-bms-bat04/sensor/jk-bms-bat04_max_cell_voltage/state'
-
-mqtt_topic["jk-bms-bat01_state_of_charge"] = 'jk-bms-bat01/sensor/jk-bms-bat01_state_of_charge/state'
-mqtt_topic["jk-bms-bat02_state_of_charge"] = 'jk-bms-bat02/sensor/jk-bms-bat02_state_of_charge/state'
-mqtt_topic["jk-bms-bat03_state_of_charge"] = 'jk-bms-bat03/sensor/jk-bms-bat03_state_of_charge/state'
-mqtt_topic["jk-bms-bat04_state_of_charge"] = 'jk-bms-bat04/sensor/jk-bms-bat04_state_of_charge/state'
+# Define Requested Charge Voltage Topic
+mqtt_topic = 'jk-bms-bat02/sensor/jk-bms-bat02_requested_charge_voltage/state'
 
 # Define Requested Charge Voltage Variable
-# requested_charge_voltage = 51.0 # VDC (Default Value)
-requested_charge_voltage_offset_value = -0.2   # VDC (Fixed)
-# requested_charge_voltage_offset_value = 0.0  # VDC (Fixed)
-
-
-# Get data Mapping from Topic
-def get_key_from_topic(topic) -> str:
-    for key in mqtt_topic:
-        if mqtt_topic.get(key) == topic:
-            return key
-
-    # Not Found
-    return None
+#requestedchargevoltage = 51.0 # VDC (Default Value)
+requestedchargevoltageoffsetvalue = -0.2 # VDC (Fixed)
+#requestedchargevoltageoffsetvalue = 0.0 # VDC (Fixed)
 
 # Connect to MQTT broker
 def connect_mqtt() -> mqtt_client:
@@ -76,19 +47,14 @@ def subscribe(client: mqtt_client , data):
         #pass
         #print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
         #print(data)
-        topic_name = msg.topic
-        print(topic_name)
-        data_field = get_key_from_topic(topic_name)
-        topic_value = float(msg.payload.decode("UTF-8"))
+        orig_topic = msg.topic
+        print(orig_topic)
 
-        data[data_field] = topic_value
-        print(f'Received {topic_name}: {topic_value}')
+        requestedchargevoltage = float(msg.payload.decode("UTF-8"))
+        data['Requested_Charge_Voltage'] = requestedchargevoltage
+        print(f'Requested Charge Voltage: {requestedchargevoltage}')
 
-        #requestedchargevoltage = float(msg.payload.decode("UTF-8"))
-        #data['jk-bms-bat02_requested_charge_voltage'] = requestedchargevoltage
-        #print(f'Requested Charge Voltage: {requestedchargevoltage}')
-
-        #key = topic_name.replace(prefix + '_' , "")
+        #key = orig_topic.replace(prefix + '_' , "")
         #key = key.replace(prefix , "")
         #key = key.replace('/state' , "")
         #key = key.replace('/debug' , "") # Ignore debug messages
@@ -133,13 +99,7 @@ def subscribe(client: mqtt_client , data):
         #        data[k]['Unit'] = "none"
         #        #data[k]['Value'] = msg.payload.decode("UTF-8")
         #
-
-    # Subscribe to all MQTT Topics
-    for key in mqtt_topic:
-        topic_name = mqtt_topic[key]
-        client.subscribe(topic_name)
-
-    # Define Handler to store Responses
+    client.subscribe(mqtt_topic)
     client.on_message = on_message
 
 
@@ -148,26 +108,7 @@ def init_scheme():
     data = { }
 
     # Add Fields
-
-    # Controller Reference Voltage
-    data['jk-bms-bat02_requested_charge_voltage'] = float(51.2)
-
-    # BMS Measurements
-    data['jk-bms-bat01_min_cell_voltage'] = float(2.50)
-    data['jk-bms-bat02_min_cell_voltage'] = float(2.50)
-    data['jk-bms-bat03_min_cell_voltage'] = float(2.50)
-    data['jk-bms-bat04_min_cell_voltage'] = float(2.50)
-
-    data['jk-bms-bat01_max_cell_voltage'] = float(3.65)
-    data['jk-bms-bat02_max_cell_voltage'] = float(3.65)
-    data['jk-bms-bat03_max_cell_voltage'] = float(3.65)
-    data['jk-bms-bat04_max_cell_voltage'] = float(3.65)
-
-    # At Initialization better to leave all to 100% or have a mix of 0% and 100%
-    data['jk-bms-bat01_state_of_charge'] = float(0.0)
-    data['jk-bms-bat02_state_of_charge'] = float(100.0)
-    data['jk-bms-bat03_state_of_charge'] = float(0.0)
-    data['jk-bms-bat04_state_of_charge'] = float(100.0)
+    data['Requested_Charge_Voltage'] = float(51.2); # VDC (default Value)
 
     # Return Structure
     return data
@@ -179,7 +120,7 @@ if __name__ == "__main__":
 
     # Initialize MQTT Connection
     client = connect_mqtt()
-    subscribe(client, data)
+    subscribe(client , data)
 
     # Start MQTT Loop and Fetch MQTT Data
     client.loop_start()
@@ -256,74 +197,21 @@ if __name__ == "__main__":
         
         # Set Voltage
         set_voltage = current_setting.get("set_voltage").values[0]
-        
-        # Controller requested Charge Voltage
-        requested_charge_voltage = min([
-                                        data['jk-bms-bat02_requested_charge_voltage']
-                                    ])
-
-        # BMS Measurements
-        max_cell_voltage = max([data['jk-bms-bat01_max_cell_voltage'],
-                                data['jk-bms-bat02_max_cell_voltage'],
-                                data['jk-bms-bat03_max_cell_voltage'],
-                                data['jk-bms-bat04_max_cell_voltage']
-                                ])
-
-        min_cell_voltage = min([data['jk-bms-bat01_min_cell_voltage'],
-                                data['jk-bms-bat02_min_cell_voltage'],
-                                data['jk-bms-bat03_min_cell_voltage'],
-                                data['jk-bms-bat04_min_cell_voltage']
-                                ])
-
-        array_state_of_charge = [data['jk-bms-bat01_state_of_charge'],
-                                 data['jk-bms-bat02_state_of_charge'],
-                                 data['jk-bms-bat03_state_of_charge'],
-                                 data['jk-bms-bat04_state_of_charge']
-                                 ]
-
-        max_state_of_charge = max(array_state_of_charge)
-        min_state_of_charge = min(array_state_of_charge)
-
-        # Echo
-        print(f"Maximum Cell Voltage: {max_cell_voltage} VDC")
-        print(f"Minimum Cell Voltage: {min_cell_voltage} VDC")
-        print(f"Maximum State of Charge: {max_state_of_charge} %")
-        print(f"Minimum State of Charge: {min_state_of_charge} %")
-        print(f"Requested Charge Voltage (BMS): {requested_charge_voltage} VDC")
 
         # Reduce Voltage if requested by BMS
+        requestedchargevoltage = data['Requested_Charge_Voltage']
+        if set_voltage > (requestedchargevoltage + requestedchargevoltageoffsetvalue):
+            print(f'Output Voltage tuned down from {set_voltage} to {requestedchargevoltage + requestedchargevoltageoffsetvalue}')
+            set_voltage = requestedchargevoltage + requestedchargevoltageoffsetvalue
         
-        if set_voltage > (requested_charge_voltage + requested_charge_voltage_offset_value):
-            print(f'Output Voltage tuned down from {set_voltage} to {requested_charge_voltage + requested_charge_voltage_offset_value}')
-
-            set_voltage = requested_charge_voltage + requested_charge_voltage_offset_value
-        
-        # Reduce Voltage if we are already near the Top of the Charge Curve, i.e. if SOC > 95% OR V_Cell_Max > 3.48 VDC
-        if max_state_of_charge > 95 or max_cell_voltage > 3.48:
-            safe_voltage = 54.2
-
-            if safe_voltage < set_voltage:
-                print(f'Output Voltage tuned down from {set_voltage} to {min([set_voltage, safe_voltage])}')
-            
-            set_voltage = min([set_voltage, safe_voltage])
-
-        if min_state_of_charge < 0.10 or min_cell_voltage < 3.05:
-            safe_voltage = 51.6
-
-            if safe_voltage > set_voltage:
-                print(f'Output Voltage tuned up from {set_voltage} to {max([set_voltage, safe_voltage])}')
-            
-            set_voltage = max([set_voltage, safe_voltage])
-
-
         # Only keep 1 Decimal for Voltage Reference
-        set_voltage = round(set_voltage, 1)
+        set_voltage = round(set_voltage , 1)
 
         # Set Current
         set_current = current_setting.get("set_current").values[0]
 
         # Only keep 1 Decimal for Current Reference
-        set_current = round(set_current, 1)
+        set_current = round(set_current , 1)
 
     else:
         print(f"Error: file {reference_file} does NOT exist !")
