@@ -1,4 +1,4 @@
-import calendar
+# import calendar
 import time
 from datetime import datetime
 import pandas as pd
@@ -432,7 +432,7 @@ if __name__ == "__main__":
     # print("date:",current_time)	
 
     # Reference values are stored in strategy file
-    reference_file = f"{basepath}/{current_date}.xlsx";
+    reference_file = f"{basepath}/{current_date}.xlsx"
 
     print(f"Using Reference File {reference_file}")
     
@@ -472,7 +472,7 @@ if __name__ == "__main__":
         print(current_setting)
     else:
         print(f"Error: file {reference_file} does NOT exist !")
-        print(f"Using Default Values")
+        print("Using Default Values")
         
         # Use Default Value for Voltage
         set_voltage_raw = 51.2
