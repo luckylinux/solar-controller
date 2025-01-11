@@ -8,6 +8,9 @@ secrets/
 strategy/*.xls
 strategy/*.xlsx
 
+# XLS Config Lock Files
+strategy/.~lock.*xlsx*
+
 ############################################
 ### DEFAULT <Python> .gitignore template ###
 ############################################
