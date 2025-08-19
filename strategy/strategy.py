@@ -48,6 +48,9 @@ MQTT_TOPICS = dict()
 # Define Controller Requested Charge Voltage Topic
 MQTT_TOPICS["jk-bms-bat02_requested_charge_voltage"] = 'jk-bms-bat02/sensor/jk-bms-bat02_requested_charge_voltage/state'
 
+# Define Controller Requested Charge Current Topic
+MQTT_TOPICS["jk-bms-bat02_requested_charge_current"] = 'jk-bms-bat02/sensor/jk-bms-bat02_requested_charge_current/state'
+
 # Define BMS Measurements
 MQTT_TOPICS["jk-bms-bat01_min_cell_voltage"] = 'jk-bms-bat01/sensor/jk-bms-bat01_min_cell_voltage/state'
 MQTT_TOPICS["jk-bms-bat02_min_cell_voltage"] = 'jk-bms-bat02/sensor/jk-bms-bat02_min_cell_voltage/state'
@@ -70,9 +73,9 @@ MQTT_TOPICS["jk-bms-bat03_state_of_charge"] = 'jk-bms-bat03/sensor/jk-bms-bat03_
 MQTT_TOPICS["jk-bms-bat04_state_of_charge"] = 'jk-bms-bat04/sensor/jk-bms-bat04_state_of_charge/state'
 
 # Define Requested Charge Voltage Variable
-# requested_charge_voltage = 51.0 # VDC (Default Value)
-requested_charge_voltage_offset_value = -0.2   # VDC (Fixed)
-# requested_charge_voltage_offset_value = 0.0  # VDC (Fixed)
+# bms_requested_charge_voltage = 51.0 # VDC (Default Value)
+bms_requested_charge_voltage_offset_value = -0.2   # VDC (Fixed)
+# bms_requested_charge_voltage_offset_value = 0.0  # VDC (Fixed)
 
 
 # Get data Mapping from Topic
@@ -188,6 +191,9 @@ def init_measurement_scheme() -> None:
     # Controller Reference Voltage
     data['jk-bms-bat02_requested_charge_voltage'] = float(51.2)
 
+    # Controller Reference Current
+    data['jk-bms-bat02_requested_charge_current'] = float(50.0)
+
     # BMS Measurements
     data['jk-bms-bat01_min_cell_voltage'] = float(2.50)
     data['jk-bms-bat02_min_cell_voltage'] = float(2.50)
@@ -233,6 +239,9 @@ def init_history_scheme() -> list:
 
 # Initialize History for one Iteration:
 def init_history_fields(history_dict: dict) -> None:
+    init_history_field(history_dict, 'bms_requested_charge_voltage')
+    init_history_field(history_dict, 'bms_requested_charge_current')
+
     init_history_field(history_dict, 'set_voltage_raw')
     init_history_field(history_dict, 'set_voltage_rounded')
     init_history_field(history_dict, 'set_current_raw')
@@ -274,10 +283,6 @@ def find_history_index() -> int:
     # Use Global Variable
     # No need to specify "global" since we do NOT want to modify history_data
     # history_data
-
-    # Debug
-    # pprint.pprint(history_data)
-    # print(type(history_data))
 
     # Loop
     # for index in range(len(history_data)-1,0,-1):
@@ -487,8 +492,12 @@ if __name__ == "__main__":
     set_current_raw = current_setting.get("set_current").values[0]
     
     # Controller requested Charge Voltage
-    requested_charge_voltage = min([
+    bms_requested_charge_voltage = min([
                                     data['jk-bms-bat02_requested_charge_voltage']
+                                ])
+
+    bms_requested_charge_current = min([
+                                    data['jk-bms-bat02_requested_charge_current']
                                 ])
 
     # BMS Measurements
@@ -529,14 +538,15 @@ if __name__ == "__main__":
     print(f"Minimum State of Charge: {min_state_of_charge} %")
     print(f"Maximum Total Voltage: {max_total_voltage} VDC")
     print(f"Minimum Total Voltage: {min_total_voltage} VDC")
-    print(f"Requested Charge Voltage (BMS): {requested_charge_voltage} VDC")
+    print(f"Requested Charge Voltage (BMS): {bms_requested_charge_voltage} VDC")
+    print(f"Requested Charge Current (BMS): {bms_requested_charge_current} ADC")
 
     # Reduce Voltage if requested by BMS
     
-    if set_voltage_raw > (requested_charge_voltage + requested_charge_voltage_offset_value):
-        print(f'Output Voltage tuned down from {set_voltage_raw} to {requested_charge_voltage + requested_charge_voltage_offset_value}')
+    if set_voltage_raw > (bms_requested_charge_voltage + bms_requested_charge_voltage_offset_value):
+        print(f'Output Voltage tuned down from {set_voltage_raw} to {bms_requested_charge_voltage + bms_requested_charge_voltage_offset_value}')
 
-        set_voltage_raw = requested_charge_voltage + requested_charge_voltage_offset_value
+        set_voltage_raw = bms_requested_charge_voltage + bms_requested_charge_voltage_offset_value
     
     # Reduce Voltage if we are already near the Top of the Charge Curve, i.e. if SOC > 99% OR V_Cell_Max > 3.50 VDC
     # !! DISABLE SOC LIMITATION BY SETTING IT > 100.0 !!
@@ -544,7 +554,7 @@ if __name__ == "__main__":
     # !! NEED TO IMPLEMENT A SLEW-RATE LIMITATION in order to be able to ramp up the Voltage Again if SOC is "HIGH" !!
     # !! Need therefore to save the History to a Temporary File in order to know the Previous Value !!
     # !! Otherwise the Balancer will turn off Immediately :( !!
-    if max_state_of_charge > 999.0 or max_cell_voltage > 3.50:
+    if max_state_of_charge > 999.0 or max_cell_voltage > 3.52:
         safe_voltage = 54.6
 
         if safe_voltage < set_voltage_raw:
@@ -622,6 +632,9 @@ if __name__ == "__main__":
     history_index = find_history_index()
 
     # Add Data to History
+    add_history(index=history_index, parameter='bms_requested_charge_voltage' , value=bms_requested_charge_voltage)
+    add_history(index=history_index, parameter='bms_requested_charge_current' , value=bms_requested_charge_current)   
+
     add_history(index=history_index, parameter='set_voltage_raw' , value=set_voltage_raw)
     add_history(index=history_index, parameter='set_voltage_rounded' , value=set_voltage_rounded)
     
