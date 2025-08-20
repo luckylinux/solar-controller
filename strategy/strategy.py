@@ -19,6 +19,16 @@ basepath = pathlib.Path(__file__).parent.resolve()
 rootpath = basepath.parent.resolve()
 # print(rootpath)
 
+# Determine Configuration Path
+configpath = os.getenv("STRATEGY_CONFIG_PATH")
+if configpath is None:
+    configpath = basepath / "config"
+
+# Determine Write Path
+tmppath = os.getenv("STRAGEY_TMP_PATH")
+if tmppath is None:
+    tmppath = rootpath / "tmp"
+
 # Generate a Client ID with the subscribe prefix.
 MQTT_CLIENT_ID = f'solarstrategy-subscribe-{random.randint(0, 100)}'
 
@@ -30,10 +40,10 @@ MQTT_PASSWORD = ''
 
 # History Settings
 HISTORY_LENGTH = 10
-HISTORY_FILEPATH = f"{rootpath}/tmp/history.json"
+HISTORY_FILEPATH = f"{tmppath}/history.json"
 
-SET_VOLTAGE_FILEPATH = f"{rootpath}/tmp/set_voltage"
-SET_CURRENT_FILEPATH = f"{rootpath}/tmp/set_current"
+SET_VOLTAGE_FILEPATH = f"{tmppath}/set_voltage"
+SET_CURRENT_FILEPATH = f"{tmppath}/set_current"
 
 # Battery Settings
 CHARGE_PROTECTION_VOLTAGE_SLEW_RATE_MAX_PER_ITERATION = 0.1  # [VDC/iteration]
@@ -95,7 +105,12 @@ def connect_mqtt() -> mqtt_client:
         else:
             print("Failed to connect, return code %d\n", rc)
 
-    client = mqtt_client.Client(MQTT_CLIENT_ID)
+    # Old Paho MQTT Version 1.x
+    # client = mqtt_client.Client(MQTT_CLIENT_ID)
+
+    # New Paho MQTT Version 2.x
+    client = mqtt_client.Client(mqtt_client.CallbackAPIVersion.VERSION1, MQTT_CLIENT_ID)
+
     # client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
     client.on_connect = on_connect
     client.connect(MQTT_BROKER, MQTT_PORT)
@@ -235,7 +250,7 @@ def init_history_scheme() -> list:
 
     # Return Value
     return data
-        
+
 
 # Initialize History for one Iteration:
 def init_history_fields(history_dict: dict) -> None:
@@ -328,7 +343,7 @@ def load_history() -> dict:
             with open(HISTORY_FILEPATH , 'r') as history_file_handle:
                 # Read the entire content of the file
                 history_data = json.loads(history_file_handle.read())
-                
+
                 # Close File
                 history_file_handle.close()
         except json.decoder.JSONDecodeError as e:
@@ -396,8 +411,11 @@ def print_history() -> None:
     print(json.dumps(history_data, sort_keys=True, indent=4))
 
 
-# Main Function (execution as Script)
-if __name__ == "__main__":
+# Strategy Iteration
+def strategy_iteration() -> None:
+    # Define Global Variable so we can modify them
+    global history_data
+
     # Init Scheme
     data = init_measurement_scheme()
 
@@ -419,7 +437,7 @@ if __name__ == "__main__":
 
     # Store UNIX Timestamp
     time_unix = time.mktime(now.timetuple())
-    
+
     # Store Formatted Time
     time_formatted = now.strftime("%Y-%m-%d-%Hh%Mm%Ss")
 
@@ -433,14 +451,14 @@ if __name__ == "__main__":
     current_time = now.strftime("%H:%M:%S")
 
     # Debug
-    # print("date:",current_date)	
-    # print("date:",current_time)	
+    # print("date:",current_date)
+    # print("date:",current_time)
 
     # Reference values are stored in strategy file
-    reference_file = f"{basepath}/{current_date}.xlsx"
+    reference_file = f"{configpath}/{current_date}.xlsx"
 
     print(f"Using Reference File {reference_file}")
-    
+
     # Declare Variables
     set_voltage_raw = 51.5
     set_current_raw = 50.0
@@ -478,10 +496,10 @@ if __name__ == "__main__":
     else:
         print(f"Error: file {reference_file} does NOT exist !")
         print("Using Default Values")
-        
+
         # Use Default Value for Voltage
         set_voltage_raw = 51.2
-	
+
     # Load History File
     history_data = load_history()
 
@@ -490,7 +508,7 @@ if __name__ == "__main__":
 
     # Retrieve Set Current Setting
     set_current_raw = current_setting.get("set_current").values[0]
-    
+
     # Controller requested Charge Voltage
     bms_requested_charge_voltage = min([
                                     data['jk-bms-bat02_requested_charge_voltage']
@@ -542,12 +560,12 @@ if __name__ == "__main__":
     print(f"Requested Charge Current (BMS): {bms_requested_charge_current} ADC")
 
     # Reduce Voltage if requested by BMS
-    
+
     if set_voltage_raw > (bms_requested_charge_voltage + bms_requested_charge_voltage_offset_value):
         print(f'Output Voltage tuned down from {set_voltage_raw} to {bms_requested_charge_voltage + bms_requested_charge_voltage_offset_value}')
 
         set_voltage_raw = bms_requested_charge_voltage + bms_requested_charge_voltage_offset_value
-    
+
     # Reduce Voltage if we are already near the Top of the Charge Curve, i.e. if SOC > 99% OR V_Cell_Max > 3.50 VDC
     # !! DISABLE SOC LIMITATION BY SETTING IT > 100.0 !!
 
@@ -559,7 +577,7 @@ if __name__ == "__main__":
 
         if safe_voltage < set_voltage_raw:
             print(f'Output Voltage tuned down from {set_voltage_raw} to {min([set_voltage_raw, safe_voltage])}')
-        
+
         set_voltage_raw = min([set_voltage_raw, safe_voltage])
 
     if min_state_of_charge < 10.0 or min_cell_voltage < 3.05:
@@ -567,7 +585,7 @@ if __name__ == "__main__":
 
         if safe_voltage > set_voltage_raw:
             print(f'Output Voltage tuned up from {set_voltage_raw} to {max([set_voltage_raw, safe_voltage])}')
-        
+
         set_voltage_raw = max([set_voltage_raw, safe_voltage])
 
     # Get Historic Data for the Required Fields
@@ -612,9 +630,9 @@ if __name__ == "__main__":
     voltage_file_handle = open(SET_VOLTAGE_FILEPATH , 'w')
     voltage_file_handle.write(set_voltage_str)
     voltage_file_handle.close()
-    
+
     print(f"Voltage Set to {set_voltage_raw} VDC")
-    
+
     # Convert Current to String
     set_current_str = str(set_current_rounded)
 
@@ -637,7 +655,7 @@ if __name__ == "__main__":
 
     add_history(index=history_index, parameter='set_voltage_raw' , value=set_voltage_raw)
     add_history(index=history_index, parameter='set_voltage_rounded' , value=set_voltage_rounded)
-    
+
     add_history(index=history_index, parameter='set_current_raw' , value=set_current_raw)
     add_history(index=history_index, parameter='set_current_rounded' , value=set_current_rounded)
 
@@ -646,7 +664,7 @@ if __name__ == "__main__":
 
     add_history(index=history_index, parameter='max_state_of_charge', value=max_state_of_charge)
     add_history(index=history_index, parameter='min_state_of_charge', value=min_state_of_charge)
-    
+
     add_history(index=history_index, parameter='max_total_voltage' , value=max_total_voltage)
     add_history(index=history_index, parameter='min_total_voltage' , value=min_total_voltage)
 
@@ -656,11 +674,34 @@ if __name__ == "__main__":
 
     add_history(index=history_index, parameter='slew_rate_set_voltage' , value=set_voltage_slew_rate)
     add_history(index=history_index, parameter='slew_rate_set_current' , value=set_current_slew_rate)
-    
 
     # Update History File
     update_history(history_data=history_data)
 
     # Print History Data
     print_history()
-    
+
+
+# Strategy Loop
+def strategy_loop() -> None:
+        while True:
+            # Run Iteration
+            strategy_iteration()
+
+            # Wait 3600 Seconds
+            time.sleep(wait_time)
+
+# Main Function (execution as Script)
+if __name__ == "__main__":
+    # Check if infinite Loop is enabled
+    infinite_loop_enabled = os.getenv("ENABLE_INFINITE_LOOP")
+
+    # Get Iteration Wait Time
+    wait_time = os.getenv("ITERATION_WAIT_TIME")
+
+    if infinite_loop_enabled is True:
+        # Run Loop
+        strategy_loop()
+    else:
+        # Run single Iteration
+        strategy_iteration()

@@ -190,3 +190,8 @@ tmp/
 # Debugging Data
 debug/
 debugging/
+
+# Ignore includes from container-build-tools
+includes
+includes/*
+includes/**
