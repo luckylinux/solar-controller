@@ -1,0 +1,59 @@
+FROM alpine:latest
+
+# Update Sources
+# Install required Packages
+RUN --mount=type=cache,mode=0777,target=/var/cache/apk,sharing=locked \
+    --mount=type=cache,mode=0777,target=/var/lib/apk,sharing=locked \
+    apk update && \
+    apk add python3 py3-pip && \
+    apk add ca-certificates bash curl wget shadow shadow-subids shadow-login
+
+# Change Shell
+RUN chsh -s /bin/bash root
+RUN export SHELL="/bin/bash"
+RUN ln -sf /bin/bash /bin/sh
+
+# Define Application Path
+ARG APP_PATH="/opt/app"
+
+# Define venv Path
+ARG VENV_PATH="/opt/venv"
+
+# Create Directories
+RUN mkdir -p "${APP_PATH}"
+
+# Copy requirements.txt
+COPY strategy/requirements.txt "/opt/requirements.txt"
+
+# Change Directory and Copy requirements.txt
+# WORKDIR "/opt"
+# COPY requirements.txt requirements.txt
+
+# Create Python venv
+RUN python3 -m venv "${VENV_PATH}"
+
+# Set PATH Variable to include venv
+ENV PATH="${VENV_PATH}/bin:$PATH"
+
+# Activate venv
+RUN source "${VENV_PATH}/bin/activate"
+#RUN sh -c ". ${VENV_PATH}/bin/activate"
+
+# Install required Packages
+RUN --mount=type=cache,mode=0777,target=/var/lib/pip,sharing=locked \
+#    pip install --cache-dir /var/lib/pip -r "${APP_PATH}/requirements.txt"
+    pip install --cache-dir /var/lib/pip -r "/opt/requirements.txt"
+
+# Set PATH Variable to Include Application
+ENV PATH="${APP_PATH}/bin:$PATH"
+
+# Change Directory
+WORKDIR "${APP_PATH}"
+
+# Copy the rest of the Application & Wrapper Script app.sh
+COPY strategy/ "${APP_PATH}"
+
+# Copy and Execute Script for Installation and Initialization of App
+COPY docker-entrypoint.sh /opt/
+RUN chmod +x /opt/docker-entrypoint.sh
+ENTRYPOINT ["/opt/docker-entrypoint.sh"]
